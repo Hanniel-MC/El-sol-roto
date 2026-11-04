@@ -1,0 +1,18 @@
+{
+  "name": "Alba Shinobi: El Sol Roto",
+  "short_name": "Alba Shinobi",
+  "description": "Juego de plataformas y combate ninja. Funciona sin internet.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#0b0d1a",
+  "theme_color": "#0b0d1a",
+  "lang": "es",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

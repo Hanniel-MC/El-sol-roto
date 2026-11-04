@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alba Shinobi">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Alba Shinobi - El Sol Roto</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cv" width="960" height="540"></canvas>
+
+<div id="touch" class="hidden">
+  <div id="dpad"><span>◀</span><span>▶</span></div>
+  <div id="acts">
+    <button class="b big" data-k="attack" style="right:6px;bottom:6px"><i></i><span>⚔</span></button>
+    <button class="b big" data-k="jump" style="right:112px;bottom:6px"><i></i><span>⤒</span></button>
+    <button class="b" data-k="dash" style="right:14px;bottom:108px"><i></i><span>≫</span></button>
+    <button class="b" data-k="throw" style="right:84px;bottom:112px"><i></i><span>✦</span></button>
+    <button class="b sp" data-k="special" style="right:154px;bottom:112px"><i></i><span>⚡</span></button>
+  </div>
+  <button id="btn-pause">❚❚</button>
+</div>
+
+<div id="ui"></div>
+<div id="rotate"><div>📱↻<p>Gira el teléfono en horizontal para jugar</p></div></div>
+
+<script src="data.js"></script>
+<script src="audio.js"></script>
+<script src="input.js"></script>
+<script src="game.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
