@@ -22,10 +22,10 @@ function setMode(m, world) { Mode = m; if (world !== undefined) scene.world = wo
 /* ---------- pantallas ---------- */
 function showSplash() {
   setMode('menu', 1);
-  ui('<div class="center splash" data-act="start"><h1 class="title">ALBA<br>SHINOBI</h1><p class="sub"> creado por Hanniel Muñoz</p><p class="tap">Toca para comenzar</p></div>');
+  ui('<div class="center splash" data-act="start"><h1 class="title">ALBA<br>SHINOBI</h1><p class="sub">El Sol Roto</p><p class="tap">Toca para comenzar</p></div>');
 }
 function showMenu() {
-  setMode('menu', Math.min(4, (Math.min(Save.best, 14) / 3) | 0)); Snd.music('menu');
+  shopPrev = null; setMode('menu', Math.min(4, (Math.min(Save.best, 14) / 3) | 0)); Snd.music('menu');
   const inst = deferredInstall ? '<button class="btn" data-act="install">📲 Instalar app</button>' : /iphone|ipad/i.test(navigator.userAgent) && !navigator.standalone ? '<button class="btn" data-act="install">📲 Instalar app</button>' : '';
   ui(`<div class="menu"><div class="logo"><h1 class="title">ALBA<br>SHINOBI</h1><p class="sub">El Sol Roto</p></div>
   <div class="mbtns"><button class="btn pri" data-act="play">▶ ${Save.best > 0 ? 'CONTINUAR' : 'JUGAR'}</button>
@@ -57,13 +57,24 @@ function showChars() {
   }
   ui(h + '</div></div>', 'right');
 }
+let shopTab = 'up';
 function showShop() {
-  setMode('menu'); let h = `<div class="page"><div class="bar"><button class="btn sm" data-act="menu">◀ Volver</button><h2>Mejoras</h2><b class="coins">● ${Save.coins}</b></div><div class="shop">`;
-  for (const u of UPS) {
+  setMode('menu'); scene.big = true; Snd.music('shop');
+  const tabs = [['up', '⬆ Mejoras'], ['wp', '⚔ Armas'], ['sk', '👘 Ropa']];
+  let h = `<div class="side"><div class="bar"><button class="btn sm" data-act="menu">◀</button><h2>Tienda</h2><b class="coins">● ${Save.coins}</b></div><div class="tabs">${tabs.map(t => `<button class="btn sm ${shopTab === t[0] ? 'pri' : ''}" data-act="stab" data-t="${t[0]}">${t[1]}</button>`).join('')}</div><div class="clist">`;
+  if (shopTab === 'up') for (const u of UPS) {
     const lv = Save.up[u.k], max = lv >= MAXUP, cost = upCost(lv);
     h += `<div class="card up"><div class="ui">${u.i}</div><div><b>${u.n}</b> <small>Nv ${lv}/${MAXUP}</small><p>${u.d}</p></div><button class="btn sm ${!max && Save.coins >= cost ? 'pri' : ''}" data-act="buy" data-k="${u.k}" ${max || Save.coins < cost ? 'disabled' : ''}>${max ? 'MAX' : '● ' + cost}</button></div>`;
+  } else {
+    const L = shopTab === 'wp' ? WEAPONS : SKINS, own = shopTab === 'wp' ? Save.own.wp : Save.own.skin, eq = shopTab === 'wp' ? Save.eqWp : Save.eqSkin;
+    for (const it of L) {
+      const has = own.includes(it.id), on = eq === it.id, pv = shopPrev && shopPrev.t === shopTab && shopPrev.id === it.id;
+      const chips = shopTab === 'wp' && it.id !== 'std' ? `<span class="chip">Daño ${it.dmg}x · Vel ${it.rate}x · Alcance ${it.reach}x${it.en ? ' · Energía +60%' : ''}</span>` : '';
+      h += `<div class="card up ${on ? 'sel' : ''} ${pv ? 'on' : ''}" data-act="prev" data-t="${shopTab}" data-id="${it.id}"><div class="ui">${shopTab === 'wp' ? '⚔' : '👘'}</div><div><b>${it.name}</b><p>${it.desc}</p>${chips}</div>
+      ${has ? `<button class="btn sm ${on ? '' : 'pri'}" data-act="eqi" data-t="${shopTab}" data-id="${it.id}">${on ? '✔ Puesto' : 'Equipar'}</button>` : `<button class="btn sm ${Save.coins >= it.price ? 'pri' : ''}" data-act="buyi" data-t="${shopTab}" data-id="${it.id}" ${Save.coins < it.price ? 'disabled' : ''}>● ${it.price}</button>`}</div>`;
+    }
   }
-  ui(h + '</div></div>');
+  ui(h + '</div></div>', 'right');
 }
 function showSettings() {
   setMode('menu'); const s = Save.set, tg = (k, t) => `<button class="btn sm tg ${s[k] ? 'on' : ''}" data-act="tog" data-k="${k}">${t}: ${s[k] ? 'SÍ' : 'NO'}</button>`;
@@ -92,15 +103,15 @@ function story(slides, world, done, who = 'Narrador') {
 /* ---------- flujo de juego ---------- */
 function beginLevel(i) {
   curLevel = i; const w = (i / 3) | 0;
-  const go = () => { hideUI(); Mode = 'game'; startLevel(i); touchEl.classList.toggle('hidden', !(isTouch || Save.set.touch)); requestWake(); };
+  shopPrev = null; const go = () => { hideUI(); Mode = 'game'; startLevel(i); touchEl.classList.toggle('hidden', !(isTouch || Save.set.touch)); requestWake(); };
   if (i % 3 === 0 && !Save.seen['w' + w]) { Save.seen['w' + w] = 1; persist(); story(WORLDS[w].intro, w, go); } else go();
 }
 function requestWake() { try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {} }
 function winLevel() {
   const w = W, idx = w.L.idx, p = w.player, before = Save.best;
   const st = 1 + (p.hp / p.maxHp >= 0.5 ? 1 : 0) + (w.coinsGot / Math.max(1, w.totalCoins) >= 0.6 ? 1 : 0);
-  Save.stars[idx] = Math.max(Save.stars[idx] || 0, st); Save.best = Math.max(Save.best, idx + 1); Save.kills += w.kills; persist();
-  const news = CHARS.filter(c => c.unlock > before && c.unlock <= Save.best), world = w.L.w, got = w.coinsGot, kills = w.kills;
+  Save.stars[idx] = Math.max(Save.stars[idx] || 0, st); Save.best = Math.max(Save.best, idx + 1); Save.kills += w.kills; const bonus = 25 + idx * 12; Save.coins += bonus; persist();
+  const news = CHARS.filter(c => c.unlock > before && c.unlock <= Save.best), world = w.L.w, got = w.coinsGot + bonus, kills = w.kills;
   const result = () => { setMode('menu', world); Snd.play('win'); ui(`<div class="center"><div class="card res"><h2>${idx === 14 ? '¡LEYENDA COMPLETADA!' : '¡NIVEL COMPLETADO!'}</h2><div class="stars">${stars(st)}</div><p>Monedas +${got} · Enemigos derrotados: ${kills}</p>${news.map(c => `<p class="new">🥷 ¡Nuevo personaje: ${c.name}!</p>`).join('')}<div class="row">${idx < 14 ? '<button class="btn pri" data-act="nextlvl">Siguiente ▶</button>' : ''}<button class="btn" data-act="retry">Repetir</button><button class="btn" data-act="shop">Mejoras</button><button class="btn" data-act="menu">Menú</button></div></div></div>`); };
   touchEl.classList.add('hidden');
   if (idx === 14) story(ENDING, 4, result); else if (w.L.boss && WORLDS[world].outro.length) story(WORLDS[world].outro, world, result); else result();
@@ -128,6 +139,10 @@ const ACT = {
   start() { Snd.init(); try { if (isTouch && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {})).catch(() => {}); } catch (e) {} applySettings();
     if (!Save.seen.intro) { Save.seen.intro = 1; persist(); story(INTRO, 1, showMenu); } else showMenu(); },
   menu: showMenu, levels: showLevels, chars: showChars, shop: showShop, settings: showSettings,
+  stab(d) { shopTab = d.t; shopPrev = null; showShop(); }, prev(d) { shopPrev = { t: d.t, id: d.id }; showShop(); },
+  buyi(d) { const wp = d.t === 'wp', it = (wp ? WEAPONS : SKINS).find(x => x.id === d.id), own = wp ? Save.own.wp : Save.own.skin;
+    if (it && !own.includes(it.id) && Save.coins >= it.price) { Save.coins -= it.price; own.push(it.id); Save[wp ? 'eqWp' : 'eqSkin'] = it.id; persist(); Snd.play('buy'); shopPrev = null; showShop(); } },
+  eqi(d) { Save[d.t === 'wp' ? 'eqWp' : 'eqSkin'] = d.id; persist(); Snd.play('equip'); shopPrev = null; showShop(); },
   play() { beginLevel(Math.min(Save.best, 14)); },
   lvl(d) { beginLevel(+d.i); }, nextlvl() { beginLevel(Math.min(14, curLevel + 1)); }, retry() { beginLevel(curLevel); },
   story() { story(INTRO, 1, showMenu); }, resume: resumeGame, quit() { W = null; Snd.stop(); showMenu(); },

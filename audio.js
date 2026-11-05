@@ -11,8 +11,15 @@ const Snd = (() => {
     w2:   { root:55, sc:[0,2,3,7,8],  bpm:108, wave:'triangle', bass:[0,-4,-7,-2], kick:true },
     w3:   { root:48, sc:[0,1,5,7,8],  bpm:120, wave:'sawtooth', bass:[0,-2,-4,-5], kick:true },
     w4:   { root:50, sc:[0,3,5,7,10], bpm:126, wave:'square',   bass:[0,-5,-2,-7], kick:true },
-    boss: { root:45, sc:[0,1,3,7,8],  bpm:144, wave:'sawtooth', bass:[0,0,-2,-5], kick:true }
+    boss: { root:45, sc:[0,1,3,7,8],  bpm:144, wave:'sawtooth', bass:[0,0,-2,-5], kick:true },
+    boss0: { root:45, sc:[0,2,3,7,9],  bpm:138, wave:'sawtooth', bass:[0,0,-2,-5], kick:true, lead:'square' },
+    boss1: { root:47, sc:[0,3,5,6,10], bpm:132, wave:'square',   bass:[0,-2,-5,-7], kick:true, lead:'triangle' },
+    boss2: { root:43, sc:[0,1,5,7,8],  bpm:128, wave:'sawtooth', bass:[0,-4,-7,-2], kick:true, lead:'square' },
+    boss3: { root:41, sc:[0,1,3,6,7],  bpm:150, wave:'sawtooth', bass:[0,0,-1,-5], kick:true, lead:'square' },
+    boss4: { root:45, sc:[0,3,5,7,10], bpm:156, wave:'sawtooth', bass:[0,-5,-2,-7], kick:true, lead:'sawtooth' },
+    shop:  { root:60, sc:[0,2,4,7,9],  bpm:92,  wave:'triangle', bass:[0,-5,-3,-7], kick:false, lead:'sine' }
   };
+  for (const k of ['w0', 'w1', 'w2', 'w3', 'w4']) THEMES[k].lead = 'triangle';
   function init() {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
     try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
@@ -56,6 +63,7 @@ const Snd = (() => {
         const oct = (s % 8 === 6) ? 12 : 0;
         if ((s * 7 + bar * 5) % 5 !== 1) tone(mtof(theme.root + bo + theme.sc[idx] + oct), nextT, sd * 1.8, theme.wave, 0.16, mus);
       }
+      if (theme.lead && s % 4 === 0 && (bar + (s >> 2)) % 3 !== 1) tone(mtof(theme.root + 12 + bo + theme.sc[(s + bar * 3) % 5]), nextT, sd * 3, theme.lead, 0.1, mus);
       if (theme.kick && s % 4 === 0) tone(120, nextT, 0.12, 'sine', 0.7, mus, 40);
       if (s % 4 === 2) noise(nextT, 0.04, 0.12, 7000, 5000, mus, 'highpass');
       if (theme.kick && s === 12) noise(nextT, 0.1, 0.18, 1800, 900, mus);
@@ -87,6 +95,17 @@ const Snd = (() => {
       case 'special': tone(150, t, 0.7, 'sawtooth', 0.3, d, 900); noise(t, 0.6, 0.5, 400, 6000, d); break;
       case 'boss': tone(90, t, 0.8, 'sawtooth', 0.4, d, 45); noise(t, 0.6, 0.4, 500, 100, d); break;
       case 'win': [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, t + i * 0.13, 0.3, 'square', 0.12, d)); break;
+      case 'swingH': noise(t, 0.22, 0.55, 1800, 300, d); tone(95, t, 0.2, 'sawtooth', 0.2, d, 50); break;
+      case 'swingM': tone(500, t, 0.25, 'sine', 0.18, d, 1300); noise(t, 0.2, 0.2, 3000, 6000, d, 'highpass'); break;
+      case 'swingK': noise(t, 0.1, 0.4, 5000, 1500, d); tone(2200, t, 0.05, 'triangle', 0.06, d, 1800); break;
+      case 'step': noise(t, 0.04, 0.12, 700, 300, d, 'lowpass'); break;
+      case 'buy': [880, 1175, 1568].forEach((f, i) => tone(f, t + i * 0.06, 0.14, 'square', 0.1, d)); break;
+      case 'equip': tone(400, t, 0.08, 'square', 0.1, d, 800); tone(600, t + 0.09, 0.1, 'square', 0.1, d, 1000); break;
+      case 'blorp': tone(220, t, 0.14, 'sine', 0.3, d, 80); tone(330, t + 0.04, 0.1, 'sine', 0.15, d, 130); break;
+      case 'growl': tone(120, t, 0.32, 'sawtooth', 0.22, d, 70); noise(t, 0.3, 0.3, 500, 150, d); break;
+      case 'flap': noise(t, 0.07, 0.3, 800, 2200, d); noise(t + 0.1, 0.07, 0.3, 800, 2200, d); break;
+      case 'ghost': tone(700, t, 0.45, 'sine', 0.18, d, 280); noise(t, 0.35, 0.2, 2500, 5000, d, 'highpass'); break;
+      case 'rumble': tone(60, t, 0.45, 'sawtooth', 0.4, d, 35); noise(t, 0.4, 0.45, 300, 80, d, 'lowpass'); break;
       case 'lose': [392, 330, 262, 196].forEach((f, i) => tone(f, t + i * 0.2, 0.4, 'triangle', 0.25, d)); break;
     }
   }

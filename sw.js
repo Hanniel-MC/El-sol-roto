@@ -1,7 +1,7 @@
 /* Service Worker: guarda todo en caché para jugar sin internet.
    Al publicar una versión nueva, cambia el número de CACHE. */
-const CACHE = 'alba-shinobi-v1';
-const ASSETS = ['./', 'index.html', 'style.css', 'data.js', 'audio.js', 'input.js', 'game.js', 'ui.js', 'manifest.json',
+const CACHE = 'alba-shinobi-v2';
+const ASSETS = ['./', 'index.html', 'style.css', 'data.js', 'audio.js', 'input.js', 'game.js', 'extra.js', 'ui.js', 'manifest.json',
   'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable.png'];
 
 self.addEventListener('install', e => {

@@ -27,6 +27,7 @@ Si cambias código, sube los archivos a GitHub y cambia el número en `sw.js` (`
 - Celular: pad izquierdo para mover y botones a la derecha (atacar, saltar, esquivar, shuriken, especial).
 
 ## Dónde editar
-- `data.js`: personajes, mundos, jefes e historia.
+- `data.js`: personajes, mundos, jefes, historia, ropa y armas de la tienda.
+- `extra.js`: enemigos no humanos, animaciones del personaje y las armas.
 - `game.js`: física, enemigos, combate y generación de niveles.
 - `ui.js`: menús, tienda y ajustes.
